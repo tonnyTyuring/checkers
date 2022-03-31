@@ -1,6 +1,8 @@
 import socket
 from tkinter import *
 
+from pyrsistent import freeze
+
 import superai2
 from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
 from checkersanalyser.moveanalyser import Side
@@ -8,7 +10,7 @@ from checkersanalyser.moveanalyser import Side
 CAMERA_IP = "192.168.0.101"
 CAMERA_PORT = 2114
 
-ROBOT_HOST = "192.168.0.103"  # IP адрес робота на ктоторый мы отсылаем сообщение
+ROBOT_HOST = "0.0.0.0"  # IP адрес робота на ктоторый мы отсылаем сообщение
 ROBOT_PORT = 3000  # Порт по которому передаётся сообщение
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Создаём сокет передачи и подключаемся
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Защита от проблем при запуске
@@ -26,6 +28,17 @@ i2 = PhotoImage(file="res/1bk.gif")
 i3 = PhotoImage(file="res/1h.gif")
 i4 = PhotoImage(file="res/1hk.gif")
 peshki = [0, i1, i2, i3, i4]
+
+
+def fuck_move(move: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    return unfuck_move(move)
+
+
+def unfuck_move(move: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    unfucked_move = []
+    for m in move:
+        unfucked_move.append((m[0], 7 - m[1]))
+    return unfucked_move
 
 
 def clone_board(src: list[list[int]]) -> list[list[int]]:
@@ -116,7 +129,7 @@ def update_view():
 def create_move() -> list[tuple[int, int]]:
     board_clone = [row.copy() for row in board]
     hod = superai2.hod_kompjutera(board_clone)
-    return hod
+    return unfuck_move(hod)
 
 
 def update_board(hod: list[tuple[int, int]], side: Side):
@@ -136,7 +149,8 @@ def update_board(hod: list[tuple[int, int]], side: Side):
     board[hod[-1][0]][hod[-1][1]] = piece
 
 
-def make_move(hod):
+def make_move(move):
+    hod = fuck_move(move)
     memory_board = clone_board(board)
     move_figure(hod[0][0], hod[0][1], 1)
     for i in range(len(hod) - 2):
@@ -184,7 +198,7 @@ def computer_make_move():
     # Проверить правильность хода игрока исходя из доски с памятью дамок
 
     new_board = get_board_from_camera()
-    if simplified_board(new_board) != simplified_board(board):
+    if simplified_board(freeze(new_board)) != simplified_board(freeze(board)):
         player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(Side.WHITES)
         update_board_with_player_move(player_moves)
 
