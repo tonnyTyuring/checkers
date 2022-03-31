@@ -149,7 +149,7 @@ def update_board(hod: list[tuple[int, int]], side: Side):
     board[hod[-1][0]][hod[-1][1]] = piece
 
 
-def make_move(move):
+def make_move(move, side: Side):
     hod = fuck_move(move)
     memory_board = clone_board(board)
     move_figure(hod[0][0], hod[0][1], 1)
@@ -161,18 +161,14 @@ def make_move(move):
         print(i)
 
     packing_figures = []
-    for i in range(len(hod) - 1):
-        if abs(hod[i][0] - hod[i + 1][0]) > 1:
-            for k in range(1, abs(hod[i][0] - hod[i + 1][0])):
-                pack_figure = (hod[i][0] + k if hod[i][0] - hod[i + 1][0] < 0 else hod[i][0] - k,
-                               hod[i][1] + k if hod[i][1] - hod[i + 1][1] < 0 else hod[i][1] - k)
-
-                print(i, k, pack_figure[0], pack_figure[1])
-                print(memory_board[pack_figure[0]][pack_figure[1]])
-                if memory_board[pack_figure[0]][7 - pack_figure[1]] == 1 or \
-                        memory_board[pack_figure[0]][pack_figure[1]] == 2:
-                    packing_figures.append(pack_figure)
-                    memory_board[pack_figure[0]][7 - pack_figure[1]] = 0
+    pos = (move[0][0], move[0][1])
+    for m in move[1:]:
+        move_vector = get_movement_vector(pos, m)
+        eaten_place = tuple(b - a for a, b in zip(move_vector, m))
+        if side.is_enemy(board[eaten_place[0]][eaten_place[1]]):
+            packing_figures.append((eaten_place[0], eaten_place[1]))
+        pos = m
+    packing_figures = fuck_move(packing_figures)
 
     print("sending packing figures")
     for i in packing_figures:
@@ -206,7 +202,7 @@ def computer_make_move():
     move = create_move()
 
     # Передать сигналы хода на роборуку (движение фигуры, собрать седенные фигуры)
-    make_move(move)
+    make_move(move, Side.BLACKES)
 
     # Обновить доск с сделанным компютером ходом
     update_board(move, Side.BLACKES)
