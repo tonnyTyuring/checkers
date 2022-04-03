@@ -6,6 +6,7 @@ from pyrsistent import freeze
 import superai2
 from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
 from checkersanalyser.moveanalyser import Side
+from checkersanalyser.movemaker import deduce_best_move
 
 CAMERA_IP = "192.168.0.101"
 CAMERA_PORT = 2114
@@ -19,14 +20,26 @@ s.listen(10)
 connection, _ = s.accept()
 
 gl_okno = Tk()  # создаём окно
-gl_okno.title('Шашки')  # заголовок окна
-doska = Canvas(gl_okno, width=800, height=800, bg='#FFFFFF')
-doska.pack()
+gl_okno.title('Шашки')
+# заголовок окна
 
-i1 = PhotoImage(file="res/1b.gif")
-i2 = PhotoImage(file="res/1bk.gif")
-i3 = PhotoImage(file="res/1h.gif")
-i4 = PhotoImage(file="res/1hk.gif")
+lf = LabelFrame(gl_okno)
+lf.pack(fill='x')
+Label(lf, text="Camera Board").pack(side=LEFT)
+Label(lf, text="Memory Board").pack(side=RIGHT)
+
+doska = Canvas(gl_okno, width=800, height=800, bg='#FFFFFF')
+doska.pack(side=LEFT)
+mem_doska = Canvas(gl_okno, width=800, height=800, bg='#FFFFFF')
+mem_doska.pack(side=RIGHT)
+
+
+from PIL import Image, ImageTk
+image_scale = (100, 100)
+i1 = ImageTk.PhotoImage(Image.open("res/1b.gif").resize(image_scale))
+i2 = ImageTk.PhotoImage(Image.open("res/1bk.gif").resize(image_scale))
+i3 = ImageTk.PhotoImage(Image.open("res/1h.gif").resize(image_scale))
+i4 = ImageTk.PhotoImage(Image.open("res/1hk.gif").resize(image_scale))
 peshki = [0, i1, i2, i3, i4]
 
 
@@ -128,13 +141,14 @@ def update_view():
 
 def create_move() -> list[tuple[int, int]]:
     board_clone = [row.copy() for row in board]
-    hod = superai2.hod_kompjutera(board_clone)
-    return unfuck_move(hod)
+    # hod = superai2.hod_kompjutera(board_clone)
+    return deduce_best_move(board_clone, Side.BLACKES).to_list()
 
 
 def update_board(hod: list[tuple[int, int]], side: Side):
     print("\n", "Update memory board", "=" * 30)
     global board
+    render_board(mem_doska, board)
     piece = board[hod[0][0]][hod[0][1]]
     pos = (hod[0][0], hod[0][1])
     for move in hod[1:]:
@@ -208,9 +222,10 @@ def computer_make_move():
     update_board(move, Side.BLACKES)
 
 
-button = Button(gl_okno, width=50, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
-button.pack()
+button = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
+button.pack(side=BOTTOM)
 
+render_board(mem_doska, board)
 update_view()
 # doska.bind(button., move() )#нажатие левой кнопки
 
