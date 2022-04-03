@@ -161,6 +161,7 @@ def update_board(hod: list[tuple[int, int]], side: Side):
         piece += 1
     board[hod[0][0]][hod[0][1]] = 0
     board[hod[-1][0]][hod[-1][1]] = piece
+    render_board(mem_doska, board)
 
 
 def make_move(move, side: Side):
