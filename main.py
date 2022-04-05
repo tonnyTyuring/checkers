@@ -1,11 +1,13 @@
+import platform
 import socket
 import threading
+import time
 import tkinter
 from tkinter import *
 
 from pyrsistent import freeze
 
-import superai2
+from tkinter import messagebox
 
 from PIL import Image, ImageTk
 
@@ -33,7 +35,7 @@ lf.pack(fill='x')
 Label(lf, text="Camera Board").pack(side=LEFT)
 Label(lf, text="Memory Board").pack(side=RIGHT)
 
-dim = 100
+dim = 50
 
 doska = Canvas(gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
 doska.pack(side=LEFT)
@@ -189,6 +191,11 @@ def make_move(move, side: Side):
 def update_board_with_player_move(player_moves: list[Move]):
     if len(player_moves) == 0:
         print("ERROR: Failed to deduce player move")
+        if platform.system() == "Windows":
+            import winsound
+            winsound.Beep(440, 500)
+        if not messagebox.askyesno("ERROR", f"Failed to deduce player Move\nContinue with computer move?"):
+            raise RuntimeError()
         return
     player_move = player_moves[0]
     if len(player_moves) > 1:
@@ -200,11 +207,8 @@ def update_board_with_player_move(player_moves: list[Move]):
 
 
 def computer_make_move():
-    if not mutex.acquire(timeout=False):
-        return
     side = _get_winning_side(freeze(board))
     if side is not None:
-        from tkinter import messagebox
         messagebox.showinfo("WINNER", f"Winner is {side}")
         return
     print("work in progress")
@@ -223,7 +227,6 @@ def computer_make_move():
 
     # Обновить доск с сделанным компютером ходом
     update_board(move, Side.BLACKES)
-    mutex.release()
 
 
 def refresh_memory():
@@ -234,7 +237,6 @@ def refresh_memory():
     render_board(mem_doska, board)
 
 
-mutex = threading.Lock()
 button1 = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
 button1.pack(side=BOTTOM)
 button2 = Button(gl_okno, width=30, height=5, text="Refresh Memory Board", command=refresh_memory, bg='#AAAAAA')
@@ -244,4 +246,14 @@ render_board(mem_doska, board)
 update_view()
 # doska.bind(button., move() )#нажатие левой кнопки
 
+def recv_from_robot():
+    while True:
+        msg = connection.recv(4).decode("utf-8")
+        if msg == "MOVE":
+            button1['state'] = DISABLED
+            computer_make_move()
+            button1['state'] = NORMAL
+        time.sleep(1)
+
+threading.Thread(target=recv_from_robot).start()
 gl_okno.mainloop()
