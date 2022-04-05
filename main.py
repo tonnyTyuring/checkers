@@ -1,4 +1,5 @@
 import socket
+import tkinter
 from tkinter import *
 
 from pyrsistent import freeze
@@ -6,7 +7,7 @@ from pyrsistent import freeze
 import superai2
 from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
 from checkersanalyser.moveanalyser import Side
-from checkersanalyser.movemaker import deduce_best_move
+from checkersanalyser.movemaker import deduce_best_move, deduce_best_complete_move, _get_winning_side
 
 CAMERA_IP = "192.168.0.101"
 CAMERA_PORT = 2114
@@ -33,8 +34,8 @@ doska.pack(side=LEFT)
 mem_doska = Canvas(gl_okno, width=800, height=800, bg='#FFFFFF')
 mem_doska.pack(side=RIGHT)
 
-
 from PIL import Image, ImageTk
+
 image_scale = (100, 100)
 i1 = ImageTk.PhotoImage(Image.open("res/1b.gif").resize(image_scale))
 i2 = ImageTk.PhotoImage(Image.open("res/1bk.gif").resize(image_scale))
@@ -59,10 +60,10 @@ def clone_board(src: list[list[int]]) -> list[list[int]]:
 
 
 def deduce_merged_cell(memcell: int, camcell: int) -> int:
-    if memcell == camcell:
-        return memcell
-    if camcell != 0 and memcell != 0:
-        return memcell
+    # if memcell == camcell:
+    #     return memcell
+    # if camcell != 0 and memcell != 0:
+    #     return memcell
     return camcell
 
 
@@ -142,7 +143,7 @@ def update_view():
 def create_move() -> list[tuple[int, int]]:
     board_clone = [row.copy() for row in board]
     # hod = superai2.hod_kompjutera(board_clone)
-    return deduce_best_move(board_clone, Side.BLACKES).to_list()
+    return deduce_best_complete_move(board_clone, Side.BLACKES).to_list()
 
 
 def update_board(hod: list[tuple[int, int]], side: Side):
@@ -205,6 +206,11 @@ def update_board_with_player_move(player_moves: list[Move]):
 
 
 def computer_make_move():
+    side = _get_winning_side(freeze(board))
+    if side is not None:
+        from tkinter import messagebox
+        messagebox.showinfo("WINNER", f"Winner is {side}")
+        return
     print("work in progress")
     # Проверить правильность хода игрока исходя из доски с памятью дамок
 
@@ -223,8 +229,18 @@ def computer_make_move():
     update_board(move, Side.BLACKES)
 
 
-button = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
-button.pack(side=BOTTOM)
+def refresh_memory():
+    global board
+    board = get_board_from_camera()
+    board[Side.WHITES.last_enemy_line()] = [Side.WHITES.to_queen(c) for c in board[Side.WHITES.last_enemy_line()]]
+    board[Side.BLACKES.last_enemy_line()] = [Side.BLACKES.to_queen(c) for c in board[Side.BLACKES.last_enemy_line()]]
+    render_board(mem_doska, board)
+
+
+button1 = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
+button1.pack(side=BOTTOM)
+button2 = Button(gl_okno, width=30, height=5, text="Refresh Memory Board", command=refresh_memory, bg='#AAAAAA')
+button2.pack(side=BOTTOM)
 
 render_board(mem_doska, board)
 update_view()
