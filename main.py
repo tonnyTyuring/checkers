@@ -1,10 +1,14 @@
 import socket
+import threading
 import tkinter
 from tkinter import *
 
 from pyrsistent import freeze
 
 import superai2
+
+from PIL import Image, ImageTk
+
 from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
 from checkersanalyser.moveanalyser import Side
 from checkersanalyser.movemaker import deduce_best_move, deduce_best_complete_move, _get_winning_side
@@ -29,14 +33,14 @@ lf.pack(fill='x')
 Label(lf, text="Camera Board").pack(side=LEFT)
 Label(lf, text="Memory Board").pack(side=RIGHT)
 
-doska = Canvas(gl_okno, width=800, height=800, bg='#FFFFFF')
+dim = 100
+
+doska = Canvas(gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
 doska.pack(side=LEFT)
-mem_doska = Canvas(gl_okno, width=800, height=800, bg='#FFFFFF')
+mem_doska = Canvas(gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
 mem_doska.pack(side=RIGHT)
 
-from PIL import Image, ImageTk
-
-image_scale = (100, 100)
+image_scale = (dim, dim)
 i1 = ImageTk.PhotoImage(Image.open("res/1b.gif").resize(image_scale))
 i2 = ImageTk.PhotoImage(Image.open("res/1bk.gif").resize(image_scale))
 i3 = ImageTk.PhotoImage(Image.open("res/1h.gif").resize(image_scale))
@@ -105,29 +109,19 @@ board = get_board_from_camera()
 
 
 def render_board(deck: Canvas, pole: list[list[int]]):  # рисуем игровое поле
-    k = 100
-    x = 0
     deck.delete('all')
+    v1xs = [i * dim * 2 + dim for i in range(4)]
+    v2xs = [i * dim * 2 for i in range(4)]
+    for ri in range(8):
+        xs = v1xs if ri % 2 == 0 else v2xs
+        [deck.create_rectangle(i, ri * dim, i + dim, ri * dim + dim, fill="black") for i in xs]
 
-    while x < 8 * k:  # рисуем доску
-        y = 1 * k
-        while y < 8 * k:
-            deck.create_rectangle(x, y, x + k, y + k, fill="black")
-            y += 2 * k
-        x += 2 * k
-    x = 1 * k
-    while x < 8 * k:  # рисуем доску
-        y = 0
-        while y < 8 * k:
-            deck.create_rectangle(x, y, x + k, y + k, fill="black")
-            y += 2 * k
-        x += 2 * k
-
-    for y in range(8):  # рисуем стоячие пешки
-        for x in range(8):
-            z = pole[y][x]
-            if z:
-                deck.create_image(x * k, y * k, anchor=NW, image=peshki[z])
+    for i in range(64):
+        x = i // 8
+        y = i % 8
+        z = pole[y][x]
+        if z:
+            deck.create_image(x * dim, y * dim, anchor=NW, image=peshki[z])
 
 
 def move_figure(x, y, comand):
@@ -206,6 +200,8 @@ def update_board_with_player_move(player_moves: list[Move]):
 
 
 def computer_make_move():
+    if not mutex.acquire(timeout=False):
+        return
     side = _get_winning_side(freeze(board))
     if side is not None:
         from tkinter import messagebox
@@ -227,6 +223,7 @@ def computer_make_move():
 
     # Обновить доск с сделанным компютером ходом
     update_board(move, Side.BLACKES)
+    mutex.release()
 
 
 def refresh_memory():
@@ -237,6 +234,7 @@ def refresh_memory():
     render_board(mem_doska, board)
 
 
+mutex = threading.Lock()
 button1 = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
 button1.pack(side=BOTTOM)
 button2 = Button(gl_okno, width=30, height=5, text="Refresh Memory Board", command=refresh_memory, bg='#AAAAAA')
