@@ -244,16 +244,23 @@ button2.pack(side=BOTTOM)
 
 render_board(mem_doska, board)
 update_view()
+
+
 # doska.bind(button., move() )#нажатие левой кнопки
 
 def recv_from_robot():
     while True:
-        msg = connection.recv(4).decode("utf-8")
-        if msg == "MOVE":
-            button1['state'] = DISABLED
-            computer_make_move()
+        try:
+            msg = connection.recv(4).decode("utf-8")
+            if msg == "MOVE":
+                button1['state'] = DISABLED
+                computer_make_move()
+        except RuntimeError:
+            pass
+        finally:
             button1['state'] = NORMAL
         time.sleep(1)
+
 
 threading.Thread(target=recv_from_robot).start()
 gl_okno.mainloop()
