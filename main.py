@@ -37,11 +37,27 @@ lf.pack(fill='x')
 Label(lf, text="Camera Board").pack(side=LEFT)
 Label(lf, text="Memory Board").pack(side=RIGHT)
 
-dim = 50
+dim = 80
+
+def callback(event):
+    global board
+    print("clicked at", event.x, event.y, event.x//dim, event.y//dim)
+    square = board[event.y//dim][event.x//dim]
+    if square == 1:
+        board[event.y // dim][event.x // dim] = 2
+    elif square == 2:
+        board[event.y // dim][event.x // dim] = 1
+    elif square == 3:
+        board[event.y // dim][event.x // dim] = 4
+    elif square == 4:
+        board[event.y // dim][event.x // dim] = 3
+
+    render_board(mem_doska, board)
 
 doska = Canvas(gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
 doska.pack(side=LEFT)
 mem_doska = Canvas(gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
+mem_doska.bind("<Button-1>", callback)
 mem_doska.pack(side=RIGHT)
 
 image_scale = (dim, dim)
