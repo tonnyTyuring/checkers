@@ -4,6 +4,7 @@ import threading
 import time
 import tkinter
 from tkinter import *
+from typing import Optional
 
 from pyrsistent import freeze
 
@@ -13,9 +14,10 @@ from PIL import Image, ImageTk
 
 from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
 from checkersanalyser.moveanalyser import Side
-from checkersanalyser.movemaker import deduce_best_move, deduce_best_complete_move, _get_winning_side
+from checkersanalyser.movemaker import deduce_best_move, deduce_best_complete_move, _get_winning_side, \
+    deduce_best_min_max_move
 
-CAMERA_IP = "192.168.0.101"
+CAMERA_IP = "192.168.0.102"
 CAMERA_PORT = 2114
 
 ROBOT_HOST = "0.0.0.0"  # IP адрес робота на ктоторый мы отсылаем сообщение
@@ -136,10 +138,10 @@ def update_view():
     gl_okno.after(1000, update_view)
 
 
-def create_move() -> list[tuple[int, int]]:
+def create_move() -> Optional[Move]:
     board_clone = [row.copy() for row in board]
     # hod = superai2.hod_kompjutera(board_clone)
-    return deduce_best_complete_move(board_clone, Side.BLACKES).to_list()
+    return deduce_best_min_max_move(board_clone, Side.BLACKES)
 
 
 def update_board(hod: list[tuple[int, int]], side: Side):
@@ -189,14 +191,6 @@ def make_move(move, side: Side):
 
 
 def update_board_with_player_move(player_moves: list[Move]):
-    if len(player_moves) == 0:
-        print("ERROR: Failed to deduce player move")
-        if platform.system() == "Windows":
-            import winsound
-            winsound.Beep(440, 500)
-        if not messagebox.askyesno("ERROR", f"Failed to deduce player Move\nContinue with computer move?"):
-            raise RuntimeError()
-        return
     player_move = player_moves[0]
     if len(player_moves) > 1:
         print("Fuck")
@@ -204,6 +198,27 @@ def update_board_with_player_move(player_moves: list[Move]):
         print("Someone program some custom logic for this")
     move = player_move.to_list()
     update_board(move, Side.WHITES)
+
+
+def predict_player_move() -> bool:
+    global board
+    attempts = 10
+    s_board = simplified_board(freeze(board))
+    while attempts > 0:
+        new_board = get_board_from_camera()
+        if s_board == new_board:
+            return True
+        player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(Side.WHITES)
+        if len(player_moves) == 0:
+            attempts -= 1
+            continue
+        update_board_with_player_move(player_moves)
+        return True
+    print("ERROR: Failed to deduce player move")
+    if platform.system() == "Windows":
+        import winsound
+        winsound.Beep(440, 500)
+    return messagebox.askyesno("ERROR", f"Failed to deduce player Move\nContinue with computer move?")
 
 
 def computer_make_move():
@@ -214,13 +229,17 @@ def computer_make_move():
     print("work in progress")
     # Проверить правильность хода игрока исходя из доски с памятью дамок
 
-    new_board = get_board_from_camera()
-    if simplified_board(freeze(new_board)) != simplified_board(freeze(board)):
-        player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(Side.WHITES)
-        update_board_with_player_move(player_moves)
+    success = predict_player_move()
+    if not success:
+        return
 
     # обращение к гавно коду superai
     move = create_move()
+    if move is None:
+        messagebox.showinfo("WINNER", f"Winner is {Side.WHITES}")
+        return
+    else:
+        move = move.to_list()
 
     # Передать сигналы хода на роборуку (движение фигуры, собрать седенные фигуры)
     make_move(move, Side.BLACKES)
