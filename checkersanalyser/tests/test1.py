@@ -1,5 +1,5 @@
-from checkersanalyser.moveanalyser import MoveAnalyser, Side
-from pyrsistent import v, pvector
+from checkersanalyser.model.sides import WHITES
+from checkersanalyser.moveanalyser import MoveAnalyser
 
 
 def test():
@@ -27,6 +27,6 @@ def test():
 
     m = MoveAnalyser(fromm, to)
 
-    res = m.calculate_move_for_side(Side.WHITES)
-    print(m.calculate_move_for_side(Side.WHITES))
+    res = m.calculate_move_for_side(WHITES)
+    print(m.calculate_move_for_side(WHITES))
     assert repr(res) == "[{(5, 1) -> (4, 2)}]"

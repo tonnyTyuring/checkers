@@ -1,6 +1,4 @@
-from checkersanalyser.moveanalyser import MoveAnalyser, Side
-from pyrsistent import v, pvector
-
+from checkersanalyser.common import Side
 from checkersanalyser.movemaker import deduce_best_move
 
 
@@ -19,5 +17,3 @@ def test():
     res = deduce_best_move(board, Side.WHITES)
     print(repr(res))
     assert repr(res) == "{(4, 2) -> (2, 0)}"
-
-

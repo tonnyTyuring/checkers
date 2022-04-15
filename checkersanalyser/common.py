@@ -27,6 +27,10 @@ def add(t1: tuple[int, int], t2: tuple[int, int]) -> tuple[int, int]:
     return t1[0] + t2[0], t1[1] + t2[1]
 
 
+def mul(t1: tuple[int, int], i: int) -> tuple[int, int]:
+    return t1[0] * i, t1[1] * i
+
+
 class Side(enum.Enum):
     WHITES = (1, 2)
     BLACKES = (3, 4)
@@ -169,7 +173,7 @@ def simplify_cell(v: int):
     return Side.deduce_side(v).to_pawn(v)
 
 
-def simplified_board(board: pvector(pvector([int]))):
+def simplified_board(board: pvector(pvector([int]))) -> pvector(pvector([int])):
     sboard = []
     for row in board:
         sboard.append([simplify_cell(i) for i in row.tolist()])

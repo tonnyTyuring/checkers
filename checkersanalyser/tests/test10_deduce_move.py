@@ -1,4 +1,5 @@
-from checkersanalyser.moveanalyser import MoveAnalyser, Side
+from checkersanalyser.common import Side
+from checkersanalyser.moveanalyser import MoveAnalyser
 from pyrsistent import v, pvector
 
 from checkersanalyser.movemaker import deduce_best_move

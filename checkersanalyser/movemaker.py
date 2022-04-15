@@ -6,11 +6,29 @@ from pyrsistent import freeze, pvector
 from checkersanalyser.common import Move, Side, get_move_chain, Piece, is_out_of_bounds, has_friend, has_enemy, \
     get_movement_vector, add, \
     is_free_for_occupation, flatlist, set_board, _get_pieces_for_side
-from checkersanalyser.moveanalyser import get_potential_moves
+
+
+def get_potential_moves(p: Piece, board: pvector(pvector([int]))) -> list[tuple[int, int]]:
+    i = p.pos[0]
+    j = p.pos[1]
+    directions = [(i - 1, j - 1), (i - 1, j + 1), (i + 1, j - 1), (i + 1, j + 1)]
+    if not p.is_queen:
+        return directions
+    queen_moves = []
+    for direction in directions:
+        movement_vector = get_movement_vector(p.pos, direction)
+        move = add(p.pos, movement_vector)
+        while not is_out_of_bounds(move) and board[move[0]][move[1]] == 0:
+            queen_moves.append(move)
+            move = add(move, movement_vector)
+        queen_moves.append(move)
+    return queen_moves
+
 
 Board = list[list[int]]
 
 target_side = Side.BLACKES;
+
 
 def _create_move(board: pvector(pvector([int])), fr: tuple[int, int], to: tuple[int, int], p: Piece) -> Optional[Move]:
     is_eat_move = False
