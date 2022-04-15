@@ -3,9 +3,9 @@ from typing import Optional
 
 from pyrsistent import freeze, pvector
 
-from checkersanalyser.common import Move, Side, get_move_chain, Piece, is_out_of_bounds, has_friend, has_enemy, \
-    get_movement_vector, add, \
-    is_free_for_occupation, flatlist, set_board, _get_pieces_for_side
+from checkersanalyser.common import get_movement_vector, add
+from checkersanalyser.legacy.movemakercommons import flatlist, is_out_of_bounds, is_free_for_occupation, Side, \
+    has_enemy, has_friend, Piece, _get_pieces_for_side, Move, get_move_chain, set_board
 
 
 def get_potential_moves(p: Piece, board: pvector(pvector([int]))) -> list[tuple[int, int]]:

@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from pyrsistent import pvector
 
-from checkersanalyser.common import simplified_board, Side
+from checkersanalyser.common import simplified_board
 from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.move import Move
 from checkersanalyser.model.piece import Piece
 from checkersanalyser.service.pieceservice import VALID_PLACES
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from checkersanalyser.model.sides import Side
 
 
 class Board:

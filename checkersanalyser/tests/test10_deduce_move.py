@@ -1,8 +1,6 @@
-from checkersanalyser.common import Side
-from checkersanalyser.moveanalyser import MoveAnalyser
-from pyrsistent import v, pvector
+from checkersanalyser.legacy.movemakercommons import Side
 
-from checkersanalyser.movemaker import deduce_best_move
+from checkersanalyser.legacy.movemaker import deduce_best_move
 
 
 def test():

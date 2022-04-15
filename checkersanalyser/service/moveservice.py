@@ -1,10 +1,10 @@
 from pyrsistent import pvector
 
-from checkersanalyser.common import Side
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.move import Move
 from checkersanalyser.model.piece import Piece
+from checkersanalyser.model.sides import Side
 from checkersanalyser.service.pieceservice import get_moves_for_piece, get_eat_moves_for_piece
 
 

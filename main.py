@@ -2,7 +2,6 @@ import platform
 import socket
 import threading
 import time
-import tkinter
 from tkinter import *
 from typing import Optional
 
@@ -14,7 +13,7 @@ from PIL import Image, ImageTk
 
 from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
 from checkersanalyser.moveanalyser import Side
-from checkersanalyser.movemaker import deduce_best_move, deduce_best_complete_move, _get_winning_side, \
+from checkersanalyser.legacy.movemaker import _get_winning_side, \
     deduce_best_min_max_move
 
 CAMERA_IP = "192.168.0.102"

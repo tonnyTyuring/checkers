@@ -1,7 +1,7 @@
-from checkersanalyser.common import Side
-from checkersanalyser.movemaker import deduce_best_min_max_move
+from checkersanalyser.legacy.movemakercommons import Side
+from checkersanalyser.legacy.movemaker import deduce_best_min_max_move
 
-from checkersanalyser.movemaker import deduce_best_complete_move
+from checkersanalyser.legacy.movemaker import deduce_best_complete_move
 
 
 def test():
