@@ -3,7 +3,7 @@ from typing import Optional
 from checkersanalyser.common import get_movement_vector, add, norm, VALID_PLACES
 from checkersanalyser.model.move import Move
 from checkersanalyser.model.piece import Piece
-from checkersanalyser.service.queenservice import get_queen_moves
+from checkersanalyser.moveresolver.queenmoveresolver import get_queen_moves
 
 
 def _get_next_cell(fr: tuple[int, int], to: tuple[int, int]) -> tuple[int, int]:
@@ -50,7 +50,7 @@ def get_eat_moves_for_piece(p: Piece) -> list[Move]:
     return [m for m in get_queen_moves(p) if m.is_eat_move]
 
 
-def get_moves_for_piece(p: Piece) -> list[Move]:
+def get_valid_moves_for_piece(p: Piece) -> list[Move]:
     if not p.is_queen:
         return _obligatory_filter(_get_pawn_moves(p))
     return _obligatory_filter(get_queen_moves(p))

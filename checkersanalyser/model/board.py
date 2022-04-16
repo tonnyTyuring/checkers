@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from pyrsistent import pvector, freeze
 
-from checkersanalyser.common import simplified_board
+from checkersanalyser.common import simplified_board, VALID_PLACES
 from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.move import Move
 from checkersanalyser.model.piece import Piece
-from checkersanalyser.service.pieceservice import VALID_PLACES
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

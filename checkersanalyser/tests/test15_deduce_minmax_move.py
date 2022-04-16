@@ -1,6 +1,6 @@
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import WHITES
-from checkersanalyser.movemaker import get_best_move
+from checkersanalyser.predrag.movemaker import get_best_move
 
 
 def test():

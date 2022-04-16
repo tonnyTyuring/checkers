@@ -2,7 +2,7 @@ from pyrsistent import freeze
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.sides import Side
-from checkersanalyser.service.moveservice import get_all_complete_moves_for_side
+from checkersanalyser.moveresolver.completemoveresolver import get_all_valid_moves_for_side
 
 
 def logged(func):
@@ -27,7 +27,7 @@ class MoveAnalyser:
 
     @logged
     def calculate_move_for_side(self, side: Side) -> list[CompleteMove]:
-        cmoves = get_all_complete_moves_for_side(self.fromm, side)
+        cmoves = get_all_valid_moves_for_side(self.fromm, side)
         valid_moves = []
         for cmove in cmoves:
             result_board = self.fromm.execute_complete_move(cmove)

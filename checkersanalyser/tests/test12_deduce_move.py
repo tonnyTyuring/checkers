@@ -1,8 +1,10 @@
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import WHITES
-from checkersanalyser.movemaker import get_best_move, COUNTER
+from checkersanalyser.predrag.movemaker import get_best_move
+from checkersanalyser.tests.utils import timeit
 
 
+@timeit("test12")
 def test():
     board = [
         [3, 0, 3, 0, 3, 0, 3, 0],  # 0
@@ -17,3 +19,4 @@ def test():
 
     res = get_best_move(Board(board), WHITES)
     print(repr(res))
+test()

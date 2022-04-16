@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import Side
-from checkersanalyser.service.moveservice import get_all_complete_moves_for_side
+from checkersanalyser.moveresolver.completemoveresolver import get_all_valid_moves_for_side
 
 
 class Node:
@@ -21,6 +21,6 @@ class Node:
     def _children(self):
         if self.children is not None:
             return self.children
-        cmoves = get_all_complete_moves_for_side(self.board, self.side)
+        cmoves = get_all_valid_moves_for_side(self.board, self.side)
         self.children = [Node(self.board.execute_complete_move(c), self.side.opposite_side()) for c in cmoves]
         return self.children

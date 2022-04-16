@@ -5,7 +5,7 @@ from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.move import Move
 from checkersanalyser.model.piece import Piece
 from checkersanalyser.model.sides import Side
-from checkersanalyser.service.pieceservice import get_moves_for_piece, get_eat_moves_for_piece
+from checkersanalyser.moveresolver.piecemoveresolver import get_eat_moves_for_piece, get_valid_moves_for_piece
 
 
 def _finish_move(movechain: pvector([Move])) -> list[CompleteMove]:
@@ -22,7 +22,7 @@ def _finish_move(movechain: pvector([Move])) -> list[CompleteMove]:
 def _get_all_complete_moves_for_piece(p: Piece) -> list[CompleteMove]:
     if len(em := get_eat_moves_for_piece(p)) != 0:
         return [cm for m in em for cm in _finish_move(pvector([m]))]
-    return [CompleteMove(pvector([m])) for m in get_moves_for_piece(p)]
+    return [CompleteMove(pvector([m])) for m in get_valid_moves_for_piece(p)]
 
 
 def _obligatory_filter(moves: list[CompleteMove]) -> list[CompleteMove]:
@@ -32,5 +32,5 @@ def _obligatory_filter(moves: list[CompleteMove]) -> list[CompleteMove]:
     return moves
 
 
-def get_all_complete_moves_for_side(b: Board, side: Side) -> list[CompleteMove]:
+def get_all_valid_moves_for_side(b: Board, side: Side) -> list[CompleteMove]:
     return _obligatory_filter([cm for p in b.get_pieces_for_side(side) for cm in _get_all_complete_moves_for_piece(p)])

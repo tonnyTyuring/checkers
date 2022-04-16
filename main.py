@@ -11,12 +11,12 @@ from tkinter import messagebox
 
 from PIL import Image, ImageTk
 
-from checkersanalyser.common import simplified_board, _get_winning_side, get_movement_vector
+from checkersanalyser.common import simplified_board, _get_winning_side
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.completemove import CompleteMove
-from checkersanalyser.model.sides import BLACKES, WHITES, Side
+from checkersanalyser.model.sides import BLACKES, WHITES
 from checkersanalyser.moveanalyser import MoveAnalyser
-from checkersanalyser.movemaker import get_best_move
+from checkersanalyser.predrag.movemaker import get_best_move
 
 CAMERA_IP = "192.168.0.101"
 CAMERA_PORT = 2114

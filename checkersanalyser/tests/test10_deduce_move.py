@@ -1,8 +1,10 @@
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import WHITES
-from checkersanalyser.movemaker import get_best_move
+from checkersanalyser.predrag.movemaker import get_best_move
+from checkersanalyser.tests.utils import timeit
 
 
+@timeit("test10")
 def test():
     board = [
         [0, 0, 0, 0, 0, 0, 0, 0],  # 0
@@ -18,5 +20,3 @@ def test():
     res = get_best_move(Board(board), WHITES)
     print(repr(res))
     assert repr(res) == "{(4, 2) -> (6, 4)}"
-
-test()
