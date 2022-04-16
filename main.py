@@ -17,6 +17,7 @@ from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.sides import BLACKES, WHITES
 from checkersanalyser.moveanalyser import MoveAnalyser
 from checkersanalyser.predrag.movemaker import get_best_move
+from checkersanalyser.predrag.worker import PredragWorker
 
 CAMERA_IP = "192.168.0.101"
 CAMERA_PORT = 2114
@@ -129,6 +130,8 @@ def get_board_from_camera() -> list[list[int]]:
 
 
 board = get_board_from_camera()
+worker = PredragWorker()
+worker.start(Board(board), BLACKES)
 
 
 def render_board(deck: Canvas, pole: list[list[int]]):  # рисуем игровое поле
@@ -159,8 +162,13 @@ def update_view():
 
 
 def create_move() -> Optional[CompleteMove]:
-    board_clone = [row.copy() for row in board]
-    return get_best_move(Board(board_clone), BLACKES)
+    board_clone = Board(board)
+    if (board_clone, BLACKES) in worker.mem:
+        move = worker.mem[(board_clone, BLACKES)]
+        worker.stop()
+        return move
+    worker.stop()
+    return get_best_move(board_clone, BLACKES)
 
 
 def update_board(move: CompleteMove):
@@ -231,6 +239,7 @@ def computer_make_move():
 
     # Обновить доск с сделанным компютером ходом
     update_board(move)
+    worker.start(Board(board), BLACKES)
 
 
 def refresh_memory():

@@ -9,6 +9,7 @@ from checkersanalyser.model.node import Node
 from checkersanalyser.model.sides import Side, deduce_side
 from checkersanalyser.moveresolver.completemoveresolver import get_all_valid_moves_for_side
 from checkersanalyser.predrag.scorecounter import score
+from checkersanalyser.predrag.worker import STOP
 
 
 class MoveMaker:
@@ -22,6 +23,8 @@ class MoveMaker:
         return any([i.moves[0].is_eat_move for i in enemy_moves])
 
     def _alphabeta(self, node: Node, depth: int, alpha: int | inf, beta: int | inf) -> float:
+        if STOP[0]:
+            return
         if node.is_terminal():
             return score(node.board.pboard, self.target_side)
         if depth <= 0 and not self._under_threat(node.board):
