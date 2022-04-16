@@ -25,7 +25,9 @@ def score(board: pvector(pvector([int])), target_side: Side) -> float:
 
 
 def _alphabeta(node: Node, depth: int, alpha: int | inf, beta: int | inf, target_side: Side) -> float:
-    if depth == 0 or node.is_terminal():
+    if node.is_terminal():
+        return score(node.board.pboard, target_side)
+    if depth == 0:
         return score(node.board.pboard, target_side)
     maximizing_player = target_side == node.side
     if maximizing_player:
@@ -52,5 +54,7 @@ def get_best_move(board: Board, target_side: Side) -> CompleteMove | None:
         return None
     nodes = [Node(board.execute_complete_move(cm), target_side.opposite_side()) for cm in cmoves]
     scores = [_alphabeta(n, 5, -inf, inf, target_side) for n in nodes]
-    i, _ = max(enumerate(scores), key=operator.itemgetter(1))
-    return cmoves[i]
+    max_score = max(scores)
+    max_indexes = [i for i, v in enumerate(scores) if v == max_score]
+    best_longest_move = max(operator.itemgetter(*max_indexes)(cmoves), key=lambda cm: len(cm.moves))
+    return best_longest_move
