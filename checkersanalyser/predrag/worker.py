@@ -4,7 +4,6 @@ from threading import Thread
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import Side
 from checkersanalyser.moveresolver.completemoveresolver import get_all_valid_moves_for_side
-from checkersanalyser.predrag.movemaker import get_best_move
 
 STOP = [False]
 
@@ -32,10 +31,11 @@ class PredragWorker:
         self.mem = {}
 
     def work(self, b: Board, ai_side: Side):
-        player_moves = get_all_valid_moves_for_side(b, ai_side.opposite_side())
-        for pm in player_moves:
+        from checkersanalyser.predrag.movemaker import get_best_move
+        boards = [b.execute_complete_move(pm) for pm in get_all_valid_moves_for_side(b, ai_side.opposite_side())]
+        boards = [b] + boards
+        for board in boards:
             if STOP[0]:
                 return
-            hypothetical_board = b.execute_complete_move(pm)
-            m = get_best_move(b.execute_complete_move(pm), ai_side)
-            self.mem[(hypothetical_board, ai_side)] = m
+            m = get_best_move(board, ai_side)
+            self.mem[(board, ai_side)] = m

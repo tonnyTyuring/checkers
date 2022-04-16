@@ -206,6 +206,7 @@ def predict_player_move() -> bool:
         player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(WHITES)
         if len(player_moves) == 0:
             attempts -= 1
+            time.sleep(0.1)
             continue
         update_board_with_player_move(player_moves)
         return True
@@ -244,10 +245,12 @@ def computer_make_move():
 
 def refresh_memory():
     global board
+    worker.stop()
     board = get_board_from_camera()
     board[WHITES.upgrade_line()] = [WHITES.to_queen(c) for c in board[WHITES.upgrade_line()]]
     board[BLACKES.upgrade_line()] = [BLACKES.to_queen(c) for c in board[BLACKES.upgrade_line()]]
     render_board(mem_doska, board)
+    worker.start(Board(board), BLACKES)
 
 
 button1 = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')

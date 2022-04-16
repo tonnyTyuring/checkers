@@ -73,3 +73,6 @@ class Board:
         print('\n\n')
         for row in self.pboard:
             print(row.tolist())
+
+    def __hash__(self):
+        return hash(self.pboard)

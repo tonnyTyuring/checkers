@@ -24,7 +24,7 @@ class MoveMaker:
 
     def _alphabeta(self, node: Node, depth: int, alpha: int | inf, beta: int | inf) -> float:
         if STOP[0]:
-            return
+            return inf
         if node.is_terminal():
             return score(node.board.pboard, self.target_side)
         if depth <= 0 and not self._under_threat(node.board):
@@ -61,12 +61,6 @@ class MoveMaker:
 
 
 def get_best_move(board: Board, target_side: Side):
-    enemy_side = target_side.opposite_side()
-    moves_num = len(get_all_valid_moves_for_side(board, target_side) + get_all_valid_moves_for_side(board, enemy_side))
-    num = int(moves_num / 2)
     depth = 5
-    while num ** depth < 5000:
-        depth += 1
-
     mm = MoveMaker(target_side, depth=depth)
     return mm.get_best_move(board)
