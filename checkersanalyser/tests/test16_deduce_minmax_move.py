@@ -1,5 +1,6 @@
-from checkersanalyser.legacy.movemakercommons import Side
-from checkersanalyser.legacy.movemaker import deduce_best_min_max_move
+from checkersanalyser.model.board import Board
+from checkersanalyser.model.sides import BLACKES
+from checkersanalyser.movemaker import get_best_move
 
 
 def test():
@@ -14,6 +15,6 @@ def test():
         [0, 0, 0, 0, 0, 0, 0, 0]
     ]
 
-    res2 = deduce_best_min_max_move(board, Side.BLACKES)
+    res2 = get_best_move(Board(board), BLACKES)
     print(repr(res2))
     assert repr(res2) == "{(3, 1) -> (4, 0)}"

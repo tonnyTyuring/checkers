@@ -1,4 +1,12 @@
+from __future__ import annotations
+
 from pyrsistent import pvector, freeze
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from checkersanalyser.model.sides import Side
+    from checkersanalyser.model.board import Board
 
 VALID_PLACES = [(x, y) for y in range(8) for x in range(8)]
 
@@ -37,3 +45,20 @@ def simplified_board(board: pvector(pvector([int]))) -> pvector(pvector([int])):
     return freeze(sboard)
 
 
+def _get_winning_side(b: Board) -> Side | None:
+    from checkersanalyser.model.sides import WHITES, BLACKES
+    found_sides = set()
+    for row in b.pboard:
+        for cell in row:
+            if cell == 0:
+                continue
+            if cell in WHITES:
+                found_sides.add(WHITES)
+            if cell in BLACKES:
+                found_sides.add(BLACKES)
+    if WHITES in found_sides and BLACKES in found_sides:
+        return None
+    if WHITES in found_sides:
+        return WHITES
+    else:
+        return BLACKES

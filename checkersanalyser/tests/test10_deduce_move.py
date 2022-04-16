@@ -1,6 +1,6 @@
-from checkersanalyser.legacy.movemakercommons import Side
-
-from checkersanalyser.legacy.movemaker import deduce_best_move
+from checkersanalyser.model.board import Board
+from checkersanalyser.model.sides import WHITES
+from checkersanalyser.movemaker import get_best_move
 
 
 def test():
@@ -15,6 +15,8 @@ def test():
         [0, 0, 0, 0, 0, 0, 0, 0]
     ]
 
-    res = deduce_best_move(board, Side.WHITES)
+    res = get_best_move(Board(board), WHITES)
     print(repr(res))
     assert repr(res) == "{(4, 2) -> (6, 4)}"
+
+test()

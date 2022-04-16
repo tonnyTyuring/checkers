@@ -11,10 +11,12 @@ from tkinter import messagebox
 
 from PIL import Image, ImageTk
 
-from checkersanalyser.moveanalyser import MoveAnalyser, Move, simplified_board, get_movement_vector
-from checkersanalyser.moveanalyser import Side
-from checkersanalyser.legacy.movemaker import _get_winning_side, \
-    deduce_best_min_max_move
+from checkersanalyser.common import simplified_board, _get_winning_side, get_movement_vector
+from checkersanalyser.model.board import Board
+from checkersanalyser.model.completemove import CompleteMove
+from checkersanalyser.model.sides import BLACKES, WHITES, Side
+from checkersanalyser.moveanalyser import MoveAnalyser
+from checkersanalyser.movemaker import get_best_move
 
 CAMERA_IP = "192.168.0.102"
 CAMERA_PORT = 2114
@@ -38,10 +40,11 @@ Label(lf, text="Memory Board").pack(side=RIGHT)
 
 dim = 80
 
+
 def callback(event):
     global board
-    print("clicked at", event.x, event.y, event.x//dim, event.y//dim)
-    square = board[event.y//dim][event.x//dim]
+    print("clicked at", event.x, event.y, event.x // dim, event.y // dim)
+    square = board[event.y // dim][event.x // dim]
     if square == 1:
         board[event.y // dim][event.x // dim] = 2
     elif square == 2:
@@ -52,6 +55,7 @@ def callback(event):
         board[event.y // dim][event.x // dim] = 3
 
     render_board(mem_doska, board)
+
 
 doska = Canvas(gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
 doska.pack(side=LEFT)
@@ -144,6 +148,7 @@ def render_board(deck: Canvas, pole: list[list[int]]):  # рисуем игро�
 
 
 def move_figure(x, y, comand):
+    y = 7 - y
     connection.send((chr(x) + chr(y) + chr(comand)).encode('utf8'))  # Передаём информацию]
 
 
@@ -153,66 +158,33 @@ def update_view():
     gl_okno.after(1000, update_view)
 
 
-def create_move() -> Optional[Move]:
+def create_move() -> Optional[CompleteMove]:
     board_clone = [row.copy() for row in board]
-    # hod = superai2.hod_kompjutera(board_clone)
-    return deduce_best_min_max_move(board_clone, Side.BLACKES)
+    return get_best_move(Board(board_clone), BLACKES)
 
 
-def update_board(hod: list[tuple[int, int]], side: Side):
+def update_board(move: CompleteMove):
     print("\n", "Update memory board", "=" * 30)
     global board
     render_board(mem_doska, board)
-    piece = board[hod[0][0]][hod[0][1]]
-    pos = (hod[0][0], hod[0][1])
-    for move in hod[1:]:
-        move_vector = get_movement_vector(pos, move)
-        eaten_place = tuple(b - a for a, b in zip(move_vector, move))
-        if side.is_enemy(board[eaten_place[0]][eaten_place[1]]):
-            board[eaten_place[0]][eaten_place[1]] = 0
-        pos = move
-    if any(map(lambda x: x[0] == side.last_enemy_line(), hod)) and piece in (1, 3):
-        piece += 1
-    board[hod[0][0]][hod[0][1]] = 0
-    board[hod[-1][0]][hod[-1][1]] = piece
+    board = Board(board).execute_complete_move(move).tolist()
     render_board(mem_doska, board)
 
 
-def make_move(move, side: Side):
-    hod = fuck_move(move)
-    memory_board = clone_board(board)
-    move_figure(hod[0][0], hod[0][1], 1)
-    for i in range(len(hod) - 2):
-        move_figure(hod[i + 1][0], hod[i + 1][1], 2)
-    move_figure(hod[len(hod) - 1][0], hod[len(hod) - 1][1], 3)
-
-    for i in memory_board:
-        print(i)
-
-    packing_figures = []
-    pos = (move[0][0], move[0][1])
-    for m in move[1:]:
-        move_vector = get_movement_vector(pos, m)
-        eaten_place = tuple(b - a for a, b in zip(move_vector, m))
-        if side.is_enemy(board[eaten_place[0]][eaten_place[1]]):
-            packing_figures.append((eaten_place[0], eaten_place[1]))
-        pos = m
-    packing_figures = fuck_move(packing_figures)
-
-    print("sending packing figures")
-    for i in packing_figures:
-        print(i)
-        move_figure(i[0], i[1], 4)
+def make_move(complete_move: CompleteMove):
+    move_figure(*complete_move.moves[0], 1)
+    [move_figure(*m.fr, 2) for m in complete_move.moves[1:]]
+    move_figure(*complete_move.moves[-1].to, 3)
+    [move_figure(*m.get_eaten_cell(), 4) for m in complete_move.moves if m.get_eaten_cell() is not None]
 
 
-def update_board_with_player_move(player_moves: list[Move]):
+def update_board_with_player_move(player_moves: list[CompleteMove]):
     player_move = player_moves[0]
     if len(player_moves) > 1:
         print("Fuck")
         print(player_moves)
         print("Someone program some custom logic for this")
-    move = player_move.to_list()
-    update_board(move, Side.WHITES)
+    update_board(player_move)
 
 
 def predict_player_move() -> bool:
@@ -223,7 +195,7 @@ def predict_player_move() -> bool:
         new_board = get_board_from_camera()
         if s_board == new_board:
             return True
-        player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(Side.WHITES)
+        player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(WHITES)
         if len(player_moves) == 0:
             attempts -= 1
             continue
@@ -237,7 +209,7 @@ def predict_player_move() -> bool:
 
 
 def computer_make_move():
-    side = _get_winning_side(freeze(board))
+    side = _get_winning_side(Board(board))
     if side is not None:
         messagebox.showinfo("WINNER", f"Winner is {side}")
         return
@@ -251,23 +223,21 @@ def computer_make_move():
     # обращение к гавно коду superai
     move = create_move()
     if move is None:
-        messagebox.showinfo("WINNER", f"Winner is {Side.WHITES}")
+        messagebox.showinfo("WINNER", f"Winner is {WHITES}")
         return
-    else:
-        move = move.to_list()
 
     # Передать сигналы хода на роборуку (движение фигуры, собрать седенные фигуры)
-    make_move(move, Side.BLACKES)
+    make_move(move)
 
     # Обновить доск с сделанным компютером ходом
-    update_board(move, Side.BLACKES)
+    update_board(move)
 
 
 def refresh_memory():
     global board
     board = get_board_from_camera()
-    board[Side.WHITES.last_enemy_line()] = [Side.WHITES.to_queen(c) for c in board[Side.WHITES.last_enemy_line()]]
-    board[Side.BLACKES.last_enemy_line()] = [Side.BLACKES.to_queen(c) for c in board[Side.BLACKES.last_enemy_line()]]
+    board[WHITES.last_enemy_line()] = [WHITES.to_queen(c) for c in board[WHITES.upgrade_line()]]
+    board[BLACKES.last_enemy_line()] = [BLACKES.to_queen(c) for c in board[BLACKES.upgrade_line()]]
     render_board(mem_doska, board)
 
 

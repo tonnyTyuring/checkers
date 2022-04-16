@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pyrsistent import pvector
+from pyrsistent import pvector, freeze
 
 from checkersanalyser.common import simplified_board
 from checkersanalyser.model.completemove import CompleteMove
@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 
 class Board:
 
-    def __init__(self, b: pvector(pvector([int]))):
+    def __init__(self, b: pvector(pvector([int])) | list[list[int]]):
+        if isinstance(b, list):
+            b = freeze(b)
         self.pboard = b
 
     def set(self, pos: tuple[int, int], v: int) -> Board:
@@ -38,9 +40,8 @@ class Board:
             v = side.queen_value
         new_board = self.set(m.to, v)
         new_board = new_board.set(m.fr, 0)
-        for c in m.get_involved_cells():
-            if side.is_enemy(new_board[c]):
-                new_board = new_board.set(c, 0)
+        if (ec := m.get_eaten_cell()) is not None:
+            new_board = new_board.set(ec, 0)
         return new_board
 
     def execute_complete_move(self, m: CompleteMove) -> Board:
@@ -65,6 +66,9 @@ class Board:
 
     def __repr__(self):
         return str(self.pboard.tolist())
+
+    def tolist(self):
+        return [row.tolist() for row in self.pboard]
 
     def print(self):
         print('\n\n')

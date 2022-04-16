@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from checkersanalyser.common import get_movement_vector, add
 from checkersanalyser.model.piece import Piece
 
@@ -20,6 +22,13 @@ class Move:
 
     def __repr__(self):
         return str(self)
+
+    def get_eaten_cell(self) -> tuple[int, int] | None:
+        if not self.is_eat_move:
+            return None
+        for c in self.get_involved_cells():
+            if self.piece.side.is_enemy(self.piece.board[c]):
+                return c
 
     def get_involved_cells(self) -> list[tuple[int, int]]:
         vec = get_movement_vector(self.fr, self.to)
