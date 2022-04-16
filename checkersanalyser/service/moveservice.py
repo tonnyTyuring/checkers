@@ -20,8 +20,17 @@ def _finish_move(movechain: pvector([Move])) -> list[CompleteMove]:
 
 
 def _get_all_complete_moves_for_piece(p: Piece) -> list[CompleteMove]:
-    return [cm for m in get_moves_for_piece(p) for cm in _finish_move(pvector([m]))]
+    if len(em := get_eat_moves_for_piece(p)) != 0:
+        return [cm for m in em for cm in _finish_move(pvector([m]))]
+    return [CompleteMove(pvector([m])) for m in get_moves_for_piece(p)]
+
+
+def _obligatory_filter(moves: list[CompleteMove]) -> list[CompleteMove]:
+    eat_moves = [m for m in moves if m.moves[0].is_eat_move]
+    if len(eat_moves) != 0:
+        return eat_moves
+    return moves
 
 
 def get_all_complete_moves_for_side(b: Board, side: Side) -> list[CompleteMove]:
-    return [cm for p in b.get_pieces_for_side(side) for cm in _get_all_complete_moves_for_piece(p)]
+    return _obligatory_filter([cm for p in b.get_pieces_for_side(side) for cm in _get_all_complete_moves_for_piece(p)])

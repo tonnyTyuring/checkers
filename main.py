@@ -18,7 +18,7 @@ from checkersanalyser.model.sides import BLACKES, WHITES, Side
 from checkersanalyser.moveanalyser import MoveAnalyser
 from checkersanalyser.movemaker import get_best_move
 
-CAMERA_IP = "192.168.0.102"
+CAMERA_IP = "192.168.0.101"
 CAMERA_PORT = 2114
 
 ROBOT_HOST = "0.0.0.0"  # IP адрес робота на ктоторый мы отсылаем сообщение
@@ -172,7 +172,7 @@ def update_board(move: CompleteMove):
 
 
 def make_move(complete_move: CompleteMove):
-    move_figure(*complete_move.moves[0], 1)
+    move_figure(*complete_move.moves[0].fr, 1)
     [move_figure(*m.fr, 2) for m in complete_move.moves[1:]]
     move_figure(*complete_move.moves[-1].to, 3)
     [move_figure(*m.get_eaten_cell(), 4) for m in complete_move.moves if m.get_eaten_cell() is not None]
@@ -236,8 +236,8 @@ def computer_make_move():
 def refresh_memory():
     global board
     board = get_board_from_camera()
-    board[WHITES.last_enemy_line()] = [WHITES.to_queen(c) for c in board[WHITES.upgrade_line()]]
-    board[BLACKES.last_enemy_line()] = [BLACKES.to_queen(c) for c in board[BLACKES.upgrade_line()]]
+    board[WHITES.upgrade_line()] = [WHITES.to_queen(c) for c in board[WHITES.upgrade_line()]]
+    board[BLACKES.upgrade_line()] = [BLACKES.to_queen(c) for c in board[BLACKES.upgrade_line()]]
     render_board(mem_doska, board)
 
 
