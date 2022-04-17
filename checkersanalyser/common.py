@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from checkersanalyser.model.sides import Side
     from checkersanalyser.model.board import Board
 
-VALID_PLACES = [(x, y) for y in range(8) for x in range(8)]
+VALID_PLACES = set([(x, y) for y in range(8) for x in range(8)])
 
 
 def norm(el: int) -> int:

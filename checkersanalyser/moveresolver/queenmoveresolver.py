@@ -12,7 +12,7 @@ def _explore_direction(moves: list[tuple[int, int]], d: tuple[int, int], p: Piec
         if board[to] == 0:
             moves.append(to)
         lookahead = add(to, d)
-        if p.side.is_enemy(board[to]) and board[lookahead] == 0:
+        if p.side.is_enemy(board[to]) and lookahead in VALID_PLACES and board[lookahead] == 0:
             continue
         if board[to] != 0:
             return

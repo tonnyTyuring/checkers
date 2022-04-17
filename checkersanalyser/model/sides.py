@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-from checkersanalyser.model.board import Board
-
 
 class Side:
     _UPGRADE_LINE = {1: 7, -1: 0}  # Maps direction to line on which piece upgrades to queen
@@ -37,7 +35,7 @@ class Side:
     def opposite_side(self) -> Side:
         return self.opposite
 
-    def has_enemy(self, pos: tuple[int, int], board: Board) -> bool:
+    def has_enemy(self, pos: tuple[int, int], board) -> bool:
         return board[pos] in self.opposite
 
     def is_enemy(self, v: int) -> bool:

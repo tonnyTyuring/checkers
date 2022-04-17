@@ -1,13 +1,9 @@
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from checkersanalyser.model.board import Board
-
+from checkersanalyser.model.sides import deduce_side
 
 class Piece:
 
-    def __init__(self, i, j, board: 'Board'):
-        from checkersanalyser.model.sides import deduce_side
+    def __init__(self, i, j, board):
         self.pos = (i, j)
         self.board = board
         self.value = board[i, j]

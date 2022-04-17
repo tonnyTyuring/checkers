@@ -23,8 +23,6 @@ class Board:
         return Board(self.pboard.set(pos[0], self.pboard[pos[0]].set(pos[1], v)))
 
     def __getitem__(self, pos: tuple[int, int]) -> int:
-        if pos not in VALID_PLACES:
-            return -1
         return self.pboard[pos[0]][pos[1]]
 
     def __eq__(self, other: object):
