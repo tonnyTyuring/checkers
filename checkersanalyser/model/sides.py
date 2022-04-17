@@ -55,6 +55,8 @@ class Side:
             return NotImplemented
         return self.target_direction == other.target_direction
 
+    def __hash__(self):
+        return hash((self.pawn_value, self.queen_value))
 
 WHITES = Side(1, 2, -1, "Whites")
 BLACKES = Side(3, 4, 1, "Blackes")

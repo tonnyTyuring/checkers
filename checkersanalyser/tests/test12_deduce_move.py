@@ -1,7 +1,10 @@
+from pathos.multiprocessing import freeze_support
+
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import WHITES
 from checkersanalyser.predrag.movemaker import get_best_move
 from checkersanalyser.tests.utils import timeit
+
 
 
 @timeit("test12")
@@ -19,4 +22,6 @@ def test():
 
     res = get_best_move(Board(board), WHITES)
     print(repr(res))
-test()
+
+if __name__ == "__main__":
+    test()

@@ -130,8 +130,10 @@ def get_board_from_camera() -> list[list[int]]:
 
 
 board = get_board_from_camera()
-worker = PredragWorker()
-worker.start(Board(board), BLACKES)
+
+
+# worker = PredragWorker()
+# worker.start(Board(board), BLACKES)
 
 
 def render_board(deck: Canvas, pole: list[list[int]]):  # рисуем игровое поле
@@ -163,11 +165,11 @@ def update_view():
 
 def create_move() -> Optional[CompleteMove]:
     board_clone = Board(board)
-    if (board_clone, BLACKES) in worker.mem:
-        move = worker.mem[(board_clone, BLACKES)]
-        worker.stop()
-        return move
-    worker.stop()
+    # if (board_clone, BLACKES) in worker.mem:
+    #     move = worker.mem[(board_clone, BLACKES)]
+    #     worker.stop()
+    #     return move
+    # worker.stop()
     return get_best_move(board_clone, BLACKES)
 
 
@@ -240,29 +242,17 @@ def computer_make_move():
 
     # Обновить доск с сделанным компютером ходом
     update_board(move)
-    worker.start(Board(board), BLACKES)
+    # worker.start(Board(board), BLACKES)
 
 
 def refresh_memory():
     global board
-    worker.stop()
+    # worker.stop()
     board = get_board_from_camera()
     board[WHITES.upgrade_line()] = [WHITES.to_queen(c) for c in board[WHITES.upgrade_line()]]
     board[BLACKES.upgrade_line()] = [BLACKES.to_queen(c) for c in board[BLACKES.upgrade_line()]]
     render_board(mem_doska, board)
-    worker.start(Board(board), BLACKES)
-
-
-button1 = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
-button1.pack(side=BOTTOM)
-button2 = Button(gl_okno, width=30, height=5, text="Refresh Memory Board", command=refresh_memory, bg='#AAAAAA')
-button2.pack(side=BOTTOM)
-
-render_board(mem_doska, board)
-update_view()
-
-
-# doska.bind(button., move() )#нажатие левой кнопки
+    # worker.start(Board(board), BLACKES)
 
 def recv_from_robot():
     while True:
@@ -278,5 +268,18 @@ def recv_from_robot():
         time.sleep(1)
 
 
-threading.Thread(target=recv_from_robot).start()
-gl_okno.mainloop()
+if __name__ == "__main__":
+    button1 = Button(gl_okno, width=30, height=5, text="Сделать ход", command=computer_make_move, bg='#AAAAAA')
+    button1.pack(side=BOTTOM)
+    button2 = Button(gl_okno, width=30, height=5, text="Refresh Memory Board", command=refresh_memory, bg='#AAAAAA')
+    button2.pack(side=BOTTOM)
+
+    render_board(mem_doska, board)
+    update_view()
+    threading.Thread(target=recv_from_robot).start()
+    gl_okno.mainloop()
+
+
+# doska.bind(button., move() )#нажатие левой кнопки
+
+

@@ -29,7 +29,7 @@ class MoveMaker:
             return inf
         if node.is_terminal():
             return score(node.board.pboard, self.target_side)
-        if depth <= 0 and not self._under_threat(node.board):
+        if depth <= 0:# and not self._under_threat(node.board):
             return score(node.board.pboard, self.target_side)
         maximizing_player = self.target_side == node.side
         if maximizing_player:
