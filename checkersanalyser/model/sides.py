@@ -52,6 +52,11 @@ class Side:
     def __repr__(self):
         return self.side_name
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Side):
+            return NotImplemented
+        return self.target_direction == other.target_direction
+
 
 WHITES = Side(1, 2, -1, "Whites")
 BLACKES = Side(3, 4, 1, "Blackes")
