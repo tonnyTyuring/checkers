@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from pyrsistent import pvector, freeze
 
 from typing import TYPE_CHECKING
@@ -62,3 +64,17 @@ def _get_winning_side(b: Board) -> Side | None:
         return WHITES
     else:
         return BLACKES
+
+
+def timeit(test_name):
+    def _timeit(test_func):
+        def timed(*args, **kwargs):
+            t1 = time.time()
+            ret = test_func(*args, **kwargs)
+            tm = time.time() - t1
+            print(f'{test_name} time:{tm}')
+            return ret
+
+        return timed
+
+    return _timeit

@@ -3,8 +3,7 @@ from pathos.multiprocessing import freeze_support
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.sides import WHITES
 from checkersanalyser.predrag.movemaker import get_best_move
-from checkersanalyser.tests.utils import timeit
-
+from checkersanalyser.common import timeit
 
 
 @timeit("test12")

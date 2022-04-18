@@ -6,19 +6,21 @@ from math import inf
 from checkersanalyser.model.board import Board
 from checkersanalyser.model.completemove import CompleteMove
 from checkersanalyser.model.node import Node
-from checkersanalyser.model.sides import Side, deduce_side
+from checkersanalyser.model.sides import Side
 from checkersanalyser.moveresolver.completemoveresolver import get_all_valid_moves_for_side
 from checkersanalyser.predrag.scorecounter import score
 from checkersanalyser.predrag.worker import STOP
-from pathos.multiprocessing import cpu_count, Pool
+from pathos.multiprocessing import ProcessPool, cpu_count
+
+from checkersanalyser.common import timeit
 
 
 class MoveMaker:
 
-    def __init__(self, target_side: Side, depth: int, paralellized: bool):
+    def __init__(self, target_side: Side, depth: int, parallelized: bool):
         self.target_side = target_side
         self.depth = depth
-        self.paralellized = paralellized
+        self.parallelized = parallelized
 
     def _under_threat(self, board: Board) -> bool:
         enemy_moves = get_all_valid_moves_for_side(board, self.target_side.opposite_side())
@@ -29,7 +31,7 @@ class MoveMaker:
             return inf
         if node.is_terminal():
             return score(node.board.pboard, self.target_side)
-        if depth <= 0:# and not self._under_threat(node.board):
+        if depth <= 0 and not self._under_threat(node.board):
             return score(node.board.pboard, self.target_side)
         maximizing_player = self.target_side == node.side
         if maximizing_player:
@@ -60,8 +62,8 @@ class MoveMaker:
         return best_longest_move
 
     def _max_score_indexes(self, nodes):
-        if self.paralellized:
-            with Pool(cpu_count()) as p:
+        if self.parallelized:
+            with ProcessPool(nodes=cpu_count()) as p:
                 scores = p.map(lambda x: self._alphabeta(x, self.depth, -inf, inf), nodes)
         else:
             scores = [self._alphabeta(n, self.depth, -inf, inf) for n in nodes]
@@ -70,7 +72,8 @@ class MoveMaker:
         return max_indexes
 
 
-def get_best_move(board: Board, target_side: Side):
+@timeit("Move deduction")
+def get_best_move(board: Board, target_side: Side) -> CompleteMove | None:
     depth = 5
-    mm = MoveMaker(target_side, depth=depth, paralellized=True)
+    mm = MoveMaker(target_side, depth=depth, parallelized=True)
     return mm.get_best_move(board)
