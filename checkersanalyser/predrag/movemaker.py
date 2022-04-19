@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import operator
+import random
 
 from math import inf
 from checkersanalyser.model.board import Board
@@ -17,10 +18,11 @@ from checkersanalyser.common import timeit
 
 class MoveMaker:
 
-    def __init__(self, target_side: Side, depth: int, parallelized: bool):
+    def __init__(self, target_side: Side, depth: int, parallelized: bool, randomized: bool):
         self.target_side = target_side
         self.depth = depth
         self.parallelized = parallelized
+        self.randomized = randomized
 
     def _under_threat(self, board: Board) -> bool:
         enemy_moves = get_all_valid_moves_for_side(board, self.target_side.opposite_side())
@@ -58,8 +60,12 @@ class MoveMaker:
         nodes = [Node(board.execute_complete_move(cm), self.target_side.opposite_side()) for cm in cmoves]
         max_indexes = self._max_score_indexes(nodes)
         best_moves = operator.itemgetter(*max_indexes)(cmoves) if len(max_indexes) > 1 else [cmoves[max_indexes[0]]]
-        best_longest_move = max(best_moves, key=lambda cm: len(cm.moves))
-        return best_longest_move
+        longest_move_num = max([len(cm.moves) for cm in best_moves])
+        best_longest_moves = [cm for cm in best_moves if len(cm.moves) == longest_move_num]
+        if self.randomized:
+            return random.choice(best_longest_moves)
+        else:
+            return best_longest_moves[0]
 
     def _max_score_indexes(self, nodes):
         if self.parallelized:
@@ -73,7 +79,7 @@ class MoveMaker:
 
 
 @timeit("Move deduction")
-def get_best_move(board: Board, target_side: Side) -> CompleteMove | None:
+def get_best_move(board: Board, target_side: Side, randomized=False) -> CompleteMove | None:
     depth = 5
-    mm = MoveMaker(target_side, depth=depth, parallelized=True)
+    mm = MoveMaker(target_side, depth=depth, parallelized=True, randomized=randomized)
     return mm.get_best_move(board)

@@ -11,5 +11,5 @@ def score(board: pvector(pvector([int])), target_side: Side) -> float:
                 continue
             s = deduce_side(cell)
             mul = 1 if s == target_side else -1
-            board_score += (1.1 * mul) if s.is_queen(cell) else (1 * mul)
+            board_score += (5 * mul) if s.is_queen(cell) else (3 * mul)
     return board_score

@@ -42,7 +42,7 @@ def error_msg():
     if platform.system() == "Windows":
         import winsound
         winsound.Beep(440, 500)
-    messagebox.showerror(f"Failed to deduce player Move")
+    messagebox.showerror("Move Prediction Error", "Failed to deduce player Move")
 
 
 def predict_player_move(board) -> Optional[list[CompleteMove]]:
@@ -101,7 +101,7 @@ def create_move(board) -> Optional[CompleteMove]:
     #     worker.stop()
     #     return move
     # worker.stop()
-    return get_best_move(board_clone, BLACKES)
+    return get_best_move(board_clone, BLACKES, randomized=True)
 
 
 @synchronized
