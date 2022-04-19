@@ -1,3 +1,4 @@
+import functools
 import platform
 import socket
 import threading
@@ -24,6 +25,17 @@ CAMERA_PORT = 2114
 
 ROBOT_HOST = "0.0.0.0"  # IP адрес робота на ктоторый мы отсылаем сообщение
 ROBOT_PORT = 3000  # Порт по которому передаётся сообщение
+
+
+def synchronized(wrapped):
+    lock = threading.Lock()
+
+    @functools.wraps(wrapped)
+    def _wrap(*args, **kwargs):
+        with lock:
+            return wrapped(*args, **kwargs)
+
+    return _wrap
 
 
 def error_msg():
@@ -92,6 +104,7 @@ def create_move(board) -> Optional[CompleteMove]:
     return get_best_move(board_clone, BLACKES)
 
 
+@synchronized
 def get_data() -> str:
     m = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     m.connect((CAMERA_IP, CAMERA_PORT))
