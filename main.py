@@ -53,7 +53,6 @@ def predict_player_move(board) -> Optional[list[CompleteMove]]:
         player_moves = MoveAnalyser(board, new_board).calculate_move_for_side(WHITES)
         if len(player_moves) == 0:
             attempts -= 1
-            time.sleep(0.1)
             continue
         return player_moves
     print("ERROR: Failed to deduce player move")
@@ -110,6 +109,7 @@ def get_data() -> str:
     m.connect((CAMERA_IP, CAMERA_PORT))
     data = m.recv(64).decode('utf8')
     m.close()
+    time.sleep(0.2)
     return data
 
 
