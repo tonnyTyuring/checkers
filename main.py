@@ -230,7 +230,13 @@ class CheckersGame:
         if side is not None:
             messagebox.showinfo("WINNER", f"Winner is {side}")
             return
-        # Проверить правильность хода игрока исходя из доски с памятью дамок
+        # Провери
+        #
+        #
+        #
+        #
+        #
+        # ть правильность хода игрока исходя из доски с памятью дамок
         s_board = simplified_board(freeze(self.board))
         if s_board == get_board_from_camera():
             self.do_robot_move()
@@ -262,6 +268,14 @@ class CheckersGame:
                 if msg == "MOVE":
                     self.window.button1['state'] = DISABLED
                     self.computer_make_move()
+                    self.robot_client.get_connection.settimeout(0.01)
+                    data_len = 1
+                    while data_len != 0:
+                        try:
+                            data_len = len(self.robot_client.get_connection.recv(1))
+                        except socket.timeout:
+                            data_len = 0
+                    self.robot_client.get_connection.settimeout(None)
             except RuntimeError:
                 pass
             finally:
