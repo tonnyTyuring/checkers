@@ -70,7 +70,10 @@ class RobotClient:
     def make_move(self, complete_move: CompleteMove):
         self.move_figure(*complete_move.moves[0].fr, 1)
         [self.move_figure(*m.fr, 2) for m in complete_move.moves[1:]]
-        self.move_figure(*complete_move.moves[-1].to, 3)
+        if any([i.is_eat_move for i in complete_move.moves]):
+            self.move_figure(*complete_move.moves[-1].to, 5)
+        else:
+            self.move_figure(*complete_move.moves[-1].to, 3)
         [self.move_figure(*m.get_eaten_cell(), 4) for m in complete_move.moves if m.get_eaten_cell() is not None]
 
     @cached_property
@@ -230,13 +233,7 @@ class CheckersGame:
         if side is not None:
             messagebox.showinfo("WINNER", f"Winner is {side}")
             return
-        # Провери
-        #
-        #
-        #
-        #
-        #
-        # ть правильность хода игрока исходя из доски с памятью дамок
+        # Проверить правильность хода игрока исходя из доски с памятью дамок
         s_board = simplified_board(freeze(self.board))
         if s_board == get_board_from_camera():
             self.do_robot_move()
