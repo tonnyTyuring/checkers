@@ -26,6 +26,8 @@ CAMERA_PORT = 2114
 ROBOT_HOST = "0.0.0.0"  # IP адрес робота на ктоторый мы отсылаем сообщение
 ROBOT_PORT = 3000  # Порт по которому передаётся сообщение
 
+winner_name_map = {WHITES: "Player", BLACKES: "Computer"}
+
 
 def synchronized(wrapped):
     lock = threading.Lock()
@@ -231,7 +233,7 @@ class CheckersGame:
     def computer_make_move(self):
         side = _get_winning_side(Board(self.board))
         if side is not None:
-            messagebox.showinfo("WINNER", f"Winner is {side}")
+            messagebox.showinfo("WINNER", f"Winner is {winner_name_map[side]}")
             return
         # Проверить правильность хода игрока исходя из доски с памятью дамок
         s_board = simplified_board(freeze(self.board))
@@ -249,7 +251,7 @@ class CheckersGame:
     def do_robot_move(self):
         move = create_move(self.board)
         if move is None:
-            messagebox.showinfo("WINNER", f"Winner is {WHITES}")
+            messagebox.showinfo("WINNER", f"Winner is Player")
             return
 
         # Передать сигналы хода на роборуку (движение фигуры, собрать седенные фигуры)
