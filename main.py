@@ -136,23 +136,24 @@ def get_board_from_camera() -> list[list[int]]:
 
 class CheckersGameWindow:
 
-    def __init__(self, dim=80):
+    def __init__(self, dim=105):
         self.gl_okno = Tk()  # создаём окно
         self.gl_okno.title('Шашки')
+        self.gl_okno.config(bg="#462e25")
         self.dim = dim
         self.images = get_images(self.dim)
         self.lf = LabelFrame(self.gl_okno)
         self.lf.pack(fill='x')
         Label(self.lf, text="Camera Board").pack(side=LEFT)
         Label(self.lf, text="Memory Board").pack(side=RIGHT)
-        self.camera_board_canvas = Canvas(self.gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
+        self.camera_board_canvas = Canvas(self.gl_okno, width=dim * 8, height=dim * 8, bg='#E5D3B3', borderwidth=0)
         self.camera_board_canvas.pack(side=LEFT)
-        self.memory_board_canvas = Canvas(self.gl_okno, width=dim * 8, height=dim * 8, bg='#FFFFFF')
+        self.memory_board_canvas = Canvas(self.gl_okno, width=dim * 8, height=dim * 8, bg='#E5D3B3', borderwidth=0)
         self.memory_board_canvas.pack(side=RIGHT)
 
-        self.button1 = Button(self.gl_okno, width=30, height=5, text="Сделать ход", bg='#AAAAAA')
+        self.button1 = Button(self.gl_okno, width=30, height=5, text="Make a robot move", bg="#D2B48C")
         self.button1.pack(side=BOTTOM)
-        self.button2 = Button(self.gl_okno, width=30, height=5, text="Refresh Memory Board", bg='#AAAAAA')
+        self.button2 = Button(self.gl_okno, width=30, height=5, text="Refresh Memory Board", bg="#D2B48C")
         self.button2.pack(side=BOTTOM)
 
     def render_camera_board(self):
@@ -169,7 +170,7 @@ class CheckersGameWindow:
         v2xs = [i * dim * 2 for i in range(4)]
         for ri in range(8):
             xs = v1xs if ri % 2 == 0 else v2xs
-            [canvas.create_rectangle(i, ri * dim, i + dim, ri * dim + dim, fill="black") for i in xs]
+            [canvas.create_rectangle(i, ri * dim, i + dim, ri * dim + dim, fill="black") for i in xs] #462e25
 
         for i in range(64):
             x = i // 8
